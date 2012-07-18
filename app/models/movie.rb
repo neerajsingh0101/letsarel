@@ -12,4 +12,5 @@ class Movie < ActiveRecord::Base
   scope :superhero, lambda { where(genre: 'superhero') }
 
   scope :dccomics, lambda { joins(:production_houses).merge(ProductionHouse.dccomics) }
+  scope :upcoming, lambda { where(arel_table[:released_on].gt(Time.now)).order(:released_on) }
 end

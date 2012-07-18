@@ -163,3 +163,39 @@ INNER JOIN "productions" ON "productions"."movie_id" = "movies"."id"
 INNER JOIN "production_houses" ON "production_houses"."id" = "productions"."production_house_id"
 WHERE "production_houses"."name" = 'DC Comics'
 ```` 
+
+## reverse_order
+
+### problem
+you need to reverse the order present in scope(or scope chain).
+
+### query
+```` 
+Movie.upcoming
+```` 
+### sql
+```` 
+Movie Load (0.3ms)  SELECT "movies".* FROM "movies" WHERE ("movies"."released_on" > '2012-07-18 20:53:49.276574') ORDER BY released_on
+```` 
+### solution
+reverse_order method reverses all the order elements.
+
+### query
+```` 
+Movie.upcoming.reverse_order
+```` 
+### sql
+```` 
+SELECT "movies".* FROM "movies" WHERE ("movies"."released_on" > '2012-07-18 20:53:41.758551') ORDER BY released_on DESC
+```` 
+reverse_order can swap multiple order elements
+### query
+```` 
+Movie.upcoming.order("title desc").reverse_order
+```` 
+### sql
+```` 
+SELECT "movies".* FROM "movies" 
+WHERE ("movies"."released_on" > '2012-07-18 20:57:50.640182') 
+ORDER BY released_on DESC, title ASC
+```` 

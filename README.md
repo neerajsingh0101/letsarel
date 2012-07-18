@@ -210,11 +210,11 @@ you want to retrieve distinct elements
 Person.joins(:movies)
 ```` 
 ### sql
+```` 
 SELECT "people".* FROM "people" 
 INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id" 
 INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
-###
-
+```` 
 uniq method on scope uses distinct on sql
 
 ### query
@@ -222,10 +222,11 @@ uniq method on scope uses distinct on sql
 Person.joins(:movies).uniq
 ```` 
 ### sql
+```` 
 SELECT DISTINCT "people".* FROM "people" 
 INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id" 
 INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
-###
+```` 
 
 ### problem
 need to remove uniq on the scope chain

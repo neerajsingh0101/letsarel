@@ -2,7 +2,7 @@
 letsarel is an example project demonstrate arel capabilities in rails 3
 please take time to familiarlize with the schema
 
-![fileurls](file:///Users/subbarao/experiments/letsarel/doc/models.png)
+![schema](https://github.com/megpha/letsarel/raw/master/doc/models.png)
 
 ## Usage
 ````r  

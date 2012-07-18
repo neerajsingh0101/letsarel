@@ -94,19 +94,21 @@ class Movie < ActiveRecord::Base
 end
 ```` 
 
-query
+#### query
+
 ```` 
 Person.
   joins(movies: :production_houses).
   merge(Movie.dccomics)
 ```` 
 
-causes the below error
+#### fails with below error
 ```` 
 Person.joins(movies: :production_houses).merge(Movie.dccomics).to_a
 ActiveRecord::ConfigurationError: Association named 'production_houses' was not found; perhaps you misspelled it?
 from /Users/subbarao/.rbenv/versions/1.9.3-p0/lib/ruby/gems/1.9.1/gems/activerecord-3.2.6/lib/active_record/associations/join_dependency.rb:112:in `build'
 ```` 
+#### why?
 merge method combines the joins of the merge and assigns it to the
 current scope
 
@@ -122,17 +124,19 @@ we need to merge scope without join.
 
 thats where the except method on scope helps
 
+#### fix
+
 ```` 
 1.9.3 (main):0 > Person.joins(movies: :production_houses).merge(Movie.dccomics.except(:joins)).joins_values
 => [{:movies=>:production_houses}]
 ```` 
 
 now the combined join looks good for the scope.
-query
+#### query
 ```` 
 Person.joins(movies: :production_houses).merge(Movie.dccomics.except(:joins))
 ```` 
-sql
+#### sql
 
 ```` 
 Person Load (0.3ms)  SELECT "people".* FROM "people" INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id" INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id" INNER JOIN "productions" ON "productions"."movie_id" = "movies"."id" INNER JOIN "production_houses" ON "production_houses"."id" = "productions"."production_house_id" WHERE "production_houses"."name" = 'DC Comics'

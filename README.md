@@ -199,3 +199,55 @@ SELECT "movies".* FROM "movies"
 WHERE ("movies"."released_on" > '2012-07-18 20:57:50.640182') 
 ORDER BY released_on DESC, title ASC
 ```` 
+
+## uniq
+
+### problem
+you want to retrieve distinct elements
+
+### query
+```` 
+Person.joins(:movies)
+```` 
+### sql
+SELECT "people".* FROM "people" 
+INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id" 
+INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
+###
+
+uniq method on scope uses distinct on sql
+
+### query
+```` 
+Person.joins(:movies).uniq
+```` 
+### sql
+SELECT DISTINCT "people".* FROM "people" 
+INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id" 
+INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
+###
+
+### problem
+need to remove uniq on the scope chain
+
+### query
+```` 
+proxy = Person.joins(:movies).uniq
+```` 
+you need to remove uniq from proxy scope   
+
+### solution
+
+call uniq with false.
+
+### query
+```` 
+proxy.uniq(false)
+```` 
+### sql
+```` 
+SELECT "people".* FROM "people" 
+INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id" 
+INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
+```` 
+

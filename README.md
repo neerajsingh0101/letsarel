@@ -85,6 +85,7 @@ this distiction in later cases.
 
 
 ### except
+
 imagine a case where the merging scope has also happen to have joins
 ```` 
 class Movie < ActiveRecord::Base
@@ -127,7 +128,7 @@ thats where the except method on scope helps
 #### fix
 
 ```` 
-1.9.3 (main):0 > Person.joins(movies: :production_houses).merge(Movie.dccomics.except(:joins)).joins_values
+Person.joins(movies: :production_houses).merge(Movie.dccomics.except(:joins)).joins_values
 => [{:movies=>:production_houses}]
 ```` 
 
@@ -139,5 +140,26 @@ Person.joins(movies: :production_houses).merge(Movie.dccomics.except(:joins))
 #### sql
 
 ```` 
-Person Load (0.3ms)  SELECT "people".* FROM "people" INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id" INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id" INNER JOIN "productions" ON "productions"."movie_id" = "movies"."id" INNER JOIN "production_houses" ON "production_houses"."id" = "productions"."production_house_id" WHERE "production_houses"."name" = 'DC Comics'
+SELECT "people".* FROM "people" 
+INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id" 
+INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id" 
+INNER JOIN "productions" ON "productions"."movie_id" = "movies"."id" 
+INNER JOIN "production_houses" ON "production_houses"."id" = "productions"."production_house_id" 
+WHERE "production_houses"."name" = 'DC Comics'
+```` 
+
+### only
+this is opposite of except method
+
+#### query
+```` 
+Person.joins(movies: :production_houses).merge(Movie.dccomics.only(:where))
+```` 
+```` 
+SELECT "people".* FROM "people" 
+INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id" 
+INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id" 
+INNER JOIN "productions" ON "productions"."movie_id" = "movies"."id" 
+INNER JOIN "production_houses" ON "production_houses"."id" = "productions"."production_house_id"
+WHERE "production_houses"."name" = 'DC Comics'
 ```` 

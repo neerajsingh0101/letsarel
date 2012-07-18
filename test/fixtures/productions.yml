@@ -1,0 +1,19 @@
+batman-rises-dccomics:
+  movie: batman-raises
+  production_house: dccomics
+
+batman-rises-syncopy:
+  movie: batman-raises
+  production_house: syncopy
+
+batman-rises-legendary:
+  movie: batman-raises
+  production_house: legendary
+
+moneyball-scott-rudin:
+  movie: moneyball
+  production_house: scott-rudin
+
+moneyball-michael-de:
+  movie: moneyball
+  production_house: michael-de

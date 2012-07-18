@@ -1,0 +1,41 @@
+bale-in-batman:
+  movie: batman-raises
+  person: bale
+  role: actor
+  paid: 15
+
+nolan-in-batman:
+  movie: batman-raises
+  person: nolan
+  role: director
+  paid: 20
+
+hathaway-in-batman:
+  movie: batman-raises
+  person: hathaway
+  role: actress
+  paid: 12
+
+zimmer-in-batman:
+  movie: batman-raises
+  person: hathaway
+  role: music
+  paid: 2.5
+
+pitt-in-moneyball-actor:
+  movie: moneyball
+  person: pitt
+  role: actor
+  paid: 20
+
+pitt-in-moneyball-producer:
+  movie: moneyball
+  person: pitt
+  role: producer
+  paid: 5
+
+miller-in-moneyball:
+  movie: moneyball
+  person: miller
+  role: director
+  paid: 5

@@ -82,3 +82,58 @@ WHERE "movies"."genre" = 'superhero' AND
 
 but includes uses left outer join joins uses inner join we will discuss
 this distiction in later cases.
+
+
+### except
+imagine a case where the merging scope has also happen to have joins
+```` 
+class Movie < ActiveRecord::Base
+  .......
+  scope :dccomics, lambda { joins(:production_houses).merge(ProductionHouse.dccomics) }
+  ....
+end
+```` 
+
+query
+```` 
+Person.
+  joins(movies: :production_houses).
+  merge(Movie.dccomics)
+```` 
+
+causes the below error
+```` 
+Person.joins(movies: :production_houses).merge(Movie.dccomics).to_a
+ActiveRecord::ConfigurationError: Association named 'production_houses' was not found; perhaps you misspelled it?
+from /Users/subbarao/.rbenv/versions/1.9.3-p0/lib/ruby/gems/1.9.1/gems/activerecord-3.2.6/lib/active_record/associations/join_dependency.rb:112:in `build'
+```` 
+merge method combines the joins of the merge and assigns it to the
+current scope
+
+```` 
+Person.joins(movies: :production_houses).merge(Movie.dccomics).joins_values
+=> [{:movies=>:production_houses}, :production_houses]
+```` 
+
+but you can not directly join from person to production_houses, you can
+only do it through movies which the join is doing.
+so production_houses join in the merged scope is wrong.
+we need to merge scope without join.
+
+thats where the except method on scope helps
+
+```` 
+1.9.3 (main):0 > Person.joins(movies: :production_houses).merge(Movie.dccomics.except(:joins)).joins_values
+=> [{:movies=>:production_houses}]
+```` 
+
+now the combined join looks good for the scope.
+query
+```` 
+Person.joins(movies: :production_houses).merge(Movie.dccomics.except(:joins))
+```` 
+sql
+
+```` 
+Person Load (0.3ms)  SELECT "people".* FROM "people" INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id" INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id" INNER JOIN "productions" ON "productions"."movie_id" = "movies"."id" INNER JOIN "production_houses" ON "production_houses"."id" = "productions"."production_house_id" WHERE "production_houses"."name" = 'DC Comics'
+```` 

@@ -10,4 +10,6 @@ class Movie < ActiveRecord::Base
 
   scope :drama,     lambda { where(genre: 'drama') }
   scope :superhero, lambda { where(genre: 'superhero') }
+
+  scope :dccomics, lambda { joins(:production_houses).merge(ProductionHouse.dccomics) }
 end

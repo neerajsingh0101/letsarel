@@ -10,7 +10,7 @@ please take time to familiarlize with the schema
 ````  
 ## ActiveRecord Techniques in 3.2
 
-### merge
+## merge
 
 When you join different tables in active record query 
 you will be able to use any scopes defined on any join table
@@ -84,7 +84,7 @@ but includes uses left outer join joins uses inner join we will discuss
 this distiction in later cases.
 
 
-### except
+## except
 
 imagine a case where the merging scope has also happen to have joins
 ```` 
@@ -148,7 +148,7 @@ INNER JOIN "production_houses" ON "production_houses"."id" = "productions"."prod
 WHERE "production_houses"."name" = 'DC Comics'
 ```` 
 
-### only
+## only
 this is opposite of except method
 
 #### query

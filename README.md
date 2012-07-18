@@ -13,11 +13,14 @@ When you join different tables in active record query
 you will be able to use any scopes defined on any join table
 for example longest join we can do in the above model
 
+
 ````  
   Person.joins(collaborations: { movies: { productions: :production_houses } })
 ````  
 
 lets say i want to know all actors for superhero movies dccomics produced
+
+#### query
 
 ````  
   Person.
@@ -27,6 +30,7 @@ lets say i want to know all actors for superhero movies dccomics produced
     merge(Collaboration.as_actor)
 ```` 
 
+#### sql
 ```` 
   SELECT "people".* FROM "people" 
   INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id" 

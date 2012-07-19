@@ -30,6 +30,32 @@ WHERE "movies"."genre" = 'drama'
 AND (("people"."first_name" LIKE '%brad%' OR "people"."last_name" LIKE '%brad%'))
 ````
 
+if you use order on the including association it will trigger LEFT OUTER
+JOIN
+
+````
+Person.includes(:movies).order("movies.title")
+or 
+Person.includes(:movies).order(Movie.arel_table[:title])
+````
+result below sql
+````
+SELECT "people"."id" AS t0_r0, "people"."first_name" AS t0_r1, "people"."last_name" AS t0_r2,
+"people"."created_at" AS t0_r3, "people"."updated_at" AS t0_r4, "movies"."id" AS t1_r0, 
+"movies"."title" AS t1_r1, "movies"."budget" AS t1_r2, "movies"."revenue" AS t1_r3, 
+"movies"."released_on" AS t1_r4, "movies"."genre" AS t1_r5, "movies"."distributor_id" AS t1_r6,
+"movies"."created_at" AS t1_r7, "movies"."updated_at" AS t1_r8 FROM "people" 
+LEFT OUTER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id" 
+LEFT OUTER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id" 
+ORDER BY movies.title
+````
+but query will fail if order query element does not have a table prefix
+
+````
+Person.includes(:movies).order("title")
+SELECT "people".* FROM "people" ORDER BY title
+SQLite3::SQLException: no such column: title: SELECT "people".* FROM "people"  ORDER BY title
+````
 
 ### selecting from different tables
 

@@ -57,6 +57,25 @@ proxy.to_sql
 INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id" 
 INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id""
 ````
+### order using arel attribute
 
+if you want to specify order asc/desc in your query
 
+````
+Person.order(:first_name)
+SELECT "people".* FROM "people" ORDER BY first_name
+````
 
+you want to desc on first_name
+````
+Person.order("first_name desc")
+SELECT "people".* FROM "people" ORDER BY first_name desc
+````
+you can do this same using arel attribute
+
+````
+Person.order(Person.arel_table[:first_name].desc)
+SELECT "people".* FROM "people" ORDER BY "people"."first_name" DESC
+````
+if you use arel attribute then constructed query has the table prefix as
+opposed to first case(Person.order(:first_name))

@@ -15,4 +15,11 @@ class Person < ActiveRecord::Base
       merge(Collaboration.as_actor).
       merge(movies.scoped)
   end
+
+  def self.by_name(query)
+    q = "%#{ query }%"
+
+    where arel_table[:first_name].matches(q).
+            or(arel_table[:last_name].matches(q))
+  end
 end

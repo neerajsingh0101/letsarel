@@ -29,3 +29,34 @@ LEFT OUTER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
 WHERE "movies"."genre" = 'drama' 
 AND (("people"."first_name" LIKE '%brad%' OR "people"."last_name" LIKE '%brad%'))
 ````
+
+
+### selecting from different tables
+
+imagine i need select two columns from different tables
+
+````
+Person.joins(collaborations: :movie)
+````
+
+I need to select collaboration role and movie title from the above scope
+
+````
+Person.joins(collaborations: :movie).select("collaborations.role,
+movies.title")
+````
+
+If you want to this in arel 
+
+````
+proxy = Person.joins(collaborations: :movie)
+proxy.arel.ast.cores.first.projections = [ Collaboration.arel_table[:role], Movie.arel_table[:title] ]
+proxy.to_sql
+
+"SELECT "collaborations"."role", "movies"."title" FROM "people" 
+INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id" 
+INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id""
+````
+
+
+

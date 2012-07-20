@@ -206,6 +206,27 @@ WHERE ("movies"."released_on" > '2012-07-18 20:57:50.640182')
 ORDER BY released_on DESC, title ASC
 ````
 
+reverse_order works on association definition
+````
+author = Person.first
+author.ordered_movies
+````
+````
+SELECT "movies".* FROM "movies" 
+INNER JOIN "collaborations" ON "movies"."id" = "collaborations"."movie_id" 
+WHERE "collaborations"."person_id" = 121003286 ORDER BY title
+````
+````
+author.ordered_movies.reverse_order
+````
+````
+SELECT "movies".* FROM "movies" 
+INNER JOIN "collaborations" ON "movies"."id" = "collaborations"."movie_id" 
+WHERE "collaborations"."person_id" = 121003286 ORDER BY title DESC
+````
+
+
+
 ## uniq
 
 ### problem

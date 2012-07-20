@@ -3,6 +3,7 @@ class Person < ActiveRecord::Base
 
   has_many :collaborations
   has_many :movies, through: :collaborations
+  has_many :ordered_movies, through: :collaborations, source: :movie, class_name: 'Movie', order: :title
 
   def production_houses
     ProductionHouse.

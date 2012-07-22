@@ -5,9 +5,9 @@ please take time to familiarlize with the schema
 ![schema](https://github.com/megpha/letsarel/raw/master/doc/models.png)
 
 ## Usage
-````r
+```
   rake db:setup
-````
+```
 ## ActiveRecord Techniques in 3.2
 
 ## merge
@@ -17,9 +17,9 @@ you will be able to use any scopes defined on any join table
 for example longest join we can do in the above model
 
 
-````
+```
   Person.joins(collaborations: { movies: { productions: :production_houses } })
-````
+```
 
 Production house `DC Comics` has produced a number of movies. I want to
 know all the names of all actors for `superhero` genre movies belonging to production
@@ -32,16 +32,17 @@ Here the requirements are
 
 #### Query using joins
 
-````
+```
   Person.
     joins(collaborations: { movie: { productions: :production_house } }).
     merge(Movie.superhero).
     merge(ProductionHouse.dccomics).
     merge(Collaboration.as_actor)
-````
+```
 
-#### sql
-````
+The generate sql is
+
+```
   SELECT "people".* FROM "people"
   INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id"
   INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
@@ -50,20 +51,21 @@ Here the requirements are
   WHERE "movies"."genre" = 'superhero'
   AND "production_houses"."name" = 'DC Comics'
   AND "collaborations"."role" = 'actor'
-````
+```
 
 #### Query using include
 
-````
+```
 Person.
   includes(collaborations: { movie: { productions: :production_house } }).
   merge(Movie.superhero).
   merge(ProductionHouse.dccomics).
   merge(Collaboration.as_actor)
-````
+```
 
-#### sql
-````
+The generated sql is
+
+```
 SELECT "people"."id" AS t0_r0, "people"."first_name" AS t0_r1, "people"."last_name" AS t0_r2,
 "people"."created_at" AS t0_r3, "people"."updated_at" AS t0_r4, "collaborations"."id" AS t1_r0,
 "collaborations"."movie_id" AS t1_r1, "collaborations"."person_id" AS t1_r2,
@@ -84,45 +86,45 @@ LEFT OUTER JOIN "production_houses" ON "production_houses"."id" = "productions".
 WHERE "movies"."genre" = 'superhero' AND
 "production_houses"."name" = 'DC Comics' AND
 "collaborations"."role" = 'actor'
-````
+```
 
-Notice that `includes` uses `LEFT OUTER JOIN` whereas `joins` uses
-`join`.
-We will discuss the distinction between the two in greater detail later.
+Notice that `includes` uses `LEFT OUTER JOIN` whereas `joins` uses `join`.  We will discuss the distinction between the two in greater detail later.
 
 ## except
 
-imagine a case where the merging scope has also happen to have joins
-````
+Imagine a case where the merging scope has also happen to have joins
+
+```
 class Movie < ActiveRecord::Base
   .......
   scope :dccomics, lambda { joins(:production_houses).merge(ProductionHouse.dccomics) }
   ....
 end
-````
+```
 
 #### query
 
-````
+```
 Person.
   joins(movies: :production_houses).
   merge(Movie.dccomics)
-````
+```
 
-#### fails with below error
-````
+#### fails with following error
+
+```
 Person.joins(movies: :production_houses).merge(Movie.dccomics).to_a
 ActiveRecord::ConfigurationError: Association named 'production_houses' was not found; perhaps you misspelled it?
 from /Users/subbarao/.rbenv/versions/1.9.3-p0/lib/ruby/gems/1.9.1/gems/activerecord-3.2.6/lib/active_record/associations/join_dependency.rb:112:in `build'
-````
-#### why?
-merge method combines the joins of the merge and assigns it to the
-current scope
+```
+#### why did it fail
 
-````
+merge method combines the joins of the merge and assigns it to the current scope .
+
+```
 Person.joins(movies: :production_houses).merge(Movie.dccomics).joins_values
 => [{:movies=>:production_houses}, :production_houses]
-````
+```
 
 but you can not directly join from person to production_houses, you can
 only do it through movies which the join is doing.
@@ -133,135 +135,168 @@ thats where the except method on scope helps
 
 #### fix
 
-````
+```
 Person.joins(movies: :production_houses).merge(Movie.dccomics.except(:joins)).joins_values
 => [{:movies=>:production_houses}]
-````
+```
 
 now the combined join looks good for the scope.
+
 #### query
-````
+
+```
 Person.joins(movies: :production_houses).merge(Movie.dccomics.except(:joins))
-````
+```
+
 #### sql
 
-````
+```
 SELECT "people".* FROM "people"
 INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id"
 INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
 INNER JOIN "productions" ON "productions"."movie_id" = "movies"."id"
 INNER JOIN "production_houses" ON "production_houses"."id" = "productions"."production_house_id"
 WHERE "production_houses"."name" = 'DC Comics'
-````
+```
 
 ## only
-this is opposite of except method
+
+This is opposite of except method
 
 #### query
-````
+
+```
 Person.joins(movies: :production_houses).merge(Movie.dccomics.only(:where))
-````
-````
+```
+
+```
 SELECT "people".* FROM "people"
 INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id"
 INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
 INNER JOIN "productions" ON "productions"."movie_id" = "movies"."id"
 INNER JOIN "production_houses" ON "production_houses"."id" = "productions"."production_house_id"
 WHERE "production_houses"."name" = 'DC Comics'
-````
+```
 
 ## reverse_order
 
 ### problem
+
 you need to reverse the order present in scope(or scope chain).
 
 ### query
-````
+
+```
 Movie.upcoming
-````
+```
+
 ### sql
+
 ````
 Movie Load (0.3ms)  SELECT "movies".* FROM "movies" WHERE ("movies"."released_on" > '2012-07-18 20:53:49.276574') ORDER BY released_on
 ````
+
 ### solution
+
 reverse_order method reverses all the order elements.
 
 ### query
-````
+
+```
 Movie.upcoming.reverse_order
-````
+```
+
 ### sql
-````
+
+```
 SELECT "movies".* FROM "movies" WHERE ("movies"."released_on" > '2012-07-18 20:53:41.758551') ORDER BY released_on DESC
-````
+```
+
 reverse_order can swap multiple order elements
+
 ### query
-````
+
+```
 Movie.upcoming.order("title desc").reverse_order
-````
+```
+
 ### sql
-````
+
+```
 SELECT "movies".* FROM "movies"
 WHERE ("movies"."released_on" > '2012-07-18 20:57:50.640182')
 ORDER BY released_on DESC, title ASC
-````
+```
 
 reverse_order works on association definition
-````
+
+```
 author = Person.first
 author.ordered_movies
-````
-````
-SELECT "movies".* FROM "movies" 
-INNER JOIN "collaborations" ON "movies"."id" = "collaborations"."movie_id" 
+```
+
+```
+SELECT "movies".* FROM "movies"
+INNER JOIN "collaborations" ON "movies"."id" = "collaborations"."movie_id"
 WHERE "collaborations"."person_id" = 121003286 ORDER BY title
-````
-````
+```
+
+```
 author.ordered_movies.reverse_order
-````
-````
-SELECT "movies".* FROM "movies" 
-INNER JOIN "collaborations" ON "movies"."id" = "collaborations"."movie_id" 
+```
+
+```
+SELECT "movies".* FROM "movies"
+INNER JOIN "collaborations" ON "movies"."id" = "collaborations"."movie_id"
 WHERE "collaborations"."person_id" = 121003286 ORDER BY title DESC
-````
-
-
+```
 
 ## uniq
 
 ### problem
+
 you want to retrieve distinct elements
 
 ### query
-````
+
+```
 Person.joins(:movies)
-````
+```
+
 ### sql
-````
+
+```
 SELECT "people".* FROM "people"
 INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id"
 INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
-````
+```
+
 uniq method on scope uses distinct on sql
 
 ### query
-````
+
+```
 Person.joins(:movies).uniq
-````
+```
+
 ### sql
-````
+
+```
 SELECT DISTINCT "people".* FROM "people"
 INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id"
 INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
-````
+```
 
 ### problem
+
 need to remove uniq on the scope chain
 
 ### query
-````
+
+```
 proxy = Person.joins(:movies).uniq
-````
+```
+
 you need to remove uniq from proxy scope
 
 ### solution
@@ -269,13 +304,16 @@ you need to remove uniq from proxy scope
 call uniq with false.
 
 ### query
-````
+
+```
 proxy.uniq(false)
-````
+```
+
 ### sql
-````
+
+```
 SELECT "people".* FROM "people"
 INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id"
 INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
-````
+```
 

@@ -2,12 +2,12 @@
 letsarel is an example project demonstrate arel capabilities in rails 3
 please take time to familiarlize with the schema
 
-![schema](https://github.com/megpha/letsarel/raw/master/doc/models.png)
-
 ## Usage
+
 ```
-  rake db:setup
+rake db:setup
 ```
+
 ## ActiveRecord Techniques in 3.2
 
 ## merge
@@ -18,7 +18,7 @@ for example longest join we can do in the above model
 
 
 ```
-  Person.joins(collaborations: { movies: { productions: :production_houses } })
+Person.joins(collaborations: { movies: { productions: :production_houses } })
 ```
 
 Production house `DC Comics` has produced a number of movies. I want to
@@ -26,6 +26,7 @@ know all the names of all actors for `superhero` genre movies belonging to produ
 house `DC Comics`.
 
 Here the requirements are
+
 * Get names of people
 * production house == 'DC Comics'
 * movie genre == 'superhero'

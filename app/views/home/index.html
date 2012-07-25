@@ -46,7 +46,29 @@
       model will get clearer as we study various cases.
     </p>
 
+
     <h2>Using merge</h2>
+
+    <p>
+    Here is how I would write the query at first attempt
+    </p>
+
+<pre>
+<code>
+# query
+Person.joins(collaborations: { :movie {productions: ).where(collaborations: { role: 'actor' }, movies: {genre: 'superhero' }, production_houses: {name: 'DC Comics'})
+
+# generated sql
+SELECT "people".* FROM "people"
+INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id"
+INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
+WHERE "collaborations"."role" = 'actor' AND "movies"."genre" = 'superhero'
+
+# result
+Person id: 233763071, first_name: "Christian", last_name: "Bale",
+created_at: "2012-07-24 15:31:52", updated_at: "2012-07-24 15:31:52"
+</code>
+</pre>
 
     <p>
       Production house <code>DC Comics</code> has produced a number of movies. I want to
@@ -73,18 +95,14 @@
 
 <pre>
 <code>
+# query
 Person.
 joins(collaborations: { movie: { productions: :production_house } }).
 merge(Movie.superhero).
 merge(ProductionHouse.dccomics).
 merge(Collaboration.as_actor)
-</code>
-</pre>
 
-    <h3>Generated sql</h3>
-
-<pre>
-<code>
+#generated sql
 SELECT "people".* FROM "people"
 INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id"
 INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
@@ -93,8 +111,10 @@ INNER JOIN "production_houses" ON "production_houses"."id" = "productions"."prod
 WHERE "movies"."genre" = 'superhero'
 AND "production_houses"."name" = 'DC Comics'
 AND "collaborations"."role" = 'actor'
+
 </code>
 </pre>
+
 
     <h3>Query using include</h3>
 

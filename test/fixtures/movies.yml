@@ -12,3 +12,10 @@ moneyball:
   released_on: 2011-09-13
   genre: drama
   distributor: columbia
+
+superman:
+  title: Superman
+  budget: 55
+  released_on: 1978-12-13
+  genre: superhero
+  distributor: warner

@@ -39,3 +39,9 @@ miller-in-moneyball:
   person: miller
   role: director
   paid: 5
+
+reeve-in-superman:
+  movie: superman
+  person: reeve
+  role: actor
+  paid: 4

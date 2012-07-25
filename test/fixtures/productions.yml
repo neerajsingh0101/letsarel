@@ -17,3 +17,7 @@ moneyball-scott-rudin:
 moneyball-michael-de:
   movie: moneyball
   production_house: michael-de
+
+superman-dccomics:
+  movie: superman
+  production_house: dccomics

@@ -8,7 +8,7 @@ class Person < ActiveRecord::Base
   def production_houses
     ProductionHouse.
       joins(productions: { movie: :collaborations }).
-      merge(collaborations.scoped) 
+      merge(collaborations.scoped)
   end
 
   def movies_as_actor
@@ -22,5 +22,9 @@ class Person < ActiveRecord::Base
 
     where arel_table[:first_name].matches(q).
             or(arel_table[:last_name].matches(q))
+  end
+
+  def name
+    [first_name, last_name].join(' ')
   end
 end

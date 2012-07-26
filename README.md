@@ -3,6 +3,7 @@
 
 To discuss various queries we are going to use bunch of models like `Movie`, `Person`, `Production house` etc. We have created a github repo called [letsarel](http://github.com/bigbinary/letsarel) . Follow the given steps to setup the app so that you can play with query in console.
 
+## Setup local environment
 
 ```
 git clone git://github.com/bigbinary/letsarel.git
@@ -19,6 +20,8 @@ So the requirement is
 * Get names of actors
 * production house == 'DC Comics'
 * movie genre == 'superhero'
+
+## First attempt
 
 Here is how I would write the query at first attempt:
 
@@ -37,8 +40,10 @@ WHERE "collaborations"."role" = 'actor' AND "movies"."genre" = 'superhero'
 [#<Person id: 57213424, first_name: "Christopher", last_name: "Reeve", created_at: "2012-07-25 06:27:23", updated_at: "2012-07-25 06:27:23">]
 ```
 
+## Using merge
+
 But we are not making use of scopes already defined. Here is another
-vresion that makes use of scopes already defined.
+version that makes use of scopes already defined.
 
 ```
 Person.
@@ -60,6 +65,7 @@ AND "collaborations"."role" = 'actor'
 # result
 [#<Person id: 57213424, first_name: "Christopher", last_name: "Reeve", created_at: "2012-07-25 06:27:23", updated_at: "2012-07-25 06:27:23">]
 ```
+## Using except
 
 So `merge` is awesome. However if will fail in a few cases. For examples
 let's say that I have following scope

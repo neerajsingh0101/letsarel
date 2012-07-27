@@ -1,3 +1,4 @@
+Another version of this README is available [here](http://documentup.com/bigbinary/letsarel) .
 
 [Arel]( https://github.com/rails/arel) is awesome. Here we are going to discuss some of the neat fetures we came across.
 
@@ -27,8 +28,10 @@ Here is how I would write the query at first attempt:
 
 ```
 # query
-Person.joins(collaborations: { movie: { productions: :production_house}} ).
-  where(collaborations: { role: 'actor' }, movies: {genre: 'superhero' }, production_houses: {name: 'DC Comics'})
+Person.joins(collaborations: {movie: {productions: :production_house}}).
+  where(collaborations: { role: 'actor' },
+        movies: {genre: 'superhero' },
+        production_houses: {name: 'DC Comics'})
 
 # generated sql
 SELECT "people".* FROM "people"

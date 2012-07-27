@@ -50,27 +50,6 @@
     <h2>Using merge</h2>
 
     <p>
-    Here is how I would write the query at first attempt
-    </p>
-
-<pre>
-<code>
-# query
-Person.joins(collaborations: { :movie {productions: ).where(collaborations: { role: 'actor' }, movies: {genre: 'superhero' }, production_houses: {name: 'DC Comics'})
-
-# generated sql
-SELECT "people".* FROM "people"
-INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id"
-INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
-WHERE "collaborations"."role" = 'actor' AND "movies"."genre" = 'superhero'
-
-# result
-Person id: 233763071, first_name: "Christian", last_name: "Bale",
-created_at: "2012-07-24 15:31:52", updated_at: "2012-07-24 15:31:52"
-</code>
-</pre>
-
-    <p>
       Production house <code>DC Comics</code> has produced a number of movies. I want to
       know all the names of all actors for <code>superhero</code> genre movies belonging to production
       house <code>DC Comics</code>.
@@ -80,27 +59,51 @@ created_at: "2012-07-24 15:31:52", updated_at: "2012-07-24 15:31:52"
       So the requirement is:
     </p>
     <ul>
-      <li>
-        Get names of people
-      </li>
-      <li>
-        production house == 'DC Comics'
-      </li>
-      <li>
-        movie genre == 'superhero'
-      </li>
+      <li> Get names of people </li>
+      <li> production house == 'DC Comics' </li>
+      <li> movie genre == 'superhero' </li>
+      <li> collaborators role == 'superhero' </li>
     </ul>
+
+    <p>
+    Here is how I would write the query at first attempt
+    </p>
+
+<pre>
+<code>
+Person.joins(collaborations: { movie: {productions: :production_house }} ).
+  where(collaborations: { role: 'actor' }).
+  where(movies: {genre: 'superhero' }).
+  where(production_houses: {name: 'DC Comics'})
+
+# generated sql
+SELECT "people".* FROM "people"
+INNER JOIN "collaborations" ON "collaborations"."person_id" = "people"."id"
+INNER JOIN "movies" ON "movies"."id" = "collaborations"."movie_id"
+INNER JOIN "productions" ON "productions"."movie_id" = "movies"."id"
+INNER JOIN "production_houses" ON "production_houses"."id" = "productions"."production_house_id"
+WHERE "collaborations"."role" = 'actor'
+AND "movies"."genre" = 'superhero'
+AND "production_houses"."name" = 'DC Comics'
+
+# result
+[Person id: 57213424, first_name: "Christopher", last_name: "Reeve"]
+</code>
+</pre>
+
+    <p>
+      In the above case we did not use the named scope that we already had created.
+    </p>
 
     <h3>Query</h3>
 
 <pre>
 <code>
-# query
-Person.
-joins(collaborations: { movie: { productions: :production_house } }).
-merge(Movie.superhero).
-merge(ProductionHouse.dccomics).
-merge(Collaboration.as_actor)
+# query using merge
+Person.joins(collaborations: { movie: { productions: :production_house } }).
+  merge(Movie.superhero).
+  merge(ProductionHouse.dccomics).
+  merge(Collaboration.as_actor)
 
 #generated sql
 SELECT "people".* FROM "people"
@@ -112,6 +115,8 @@ WHERE "movies"."genre" = 'superhero'
 AND "production_houses"."name" = 'DC Comics'
 AND "collaborations"."role" = 'actor'
 
+# result
+[Person id: 57213424, first_name: "Christopher", last_name: "Reeve"]
 </code>
 </pre>
 
@@ -120,18 +125,13 @@ AND "collaborations"."role" = 'actor'
 
 <pre>
 <code>
-Person.
-includes(collaborations: { movie: { productions: :production_house } }).
-merge(Movie.superhero).
-merge(ProductionHouse.dccomics).
-merge(Collaboration.as_actor)
-</code>
-</pre>
+# query using merge and using include instead of join
+Person.includes(collaborations: { movie: { productions: :production_house } }).
+  merge(Movie.superhero).
+  merge(ProductionHouse.dccomics).
+  merge(Collaboration.as_actor)
 
-    <h3>Generated sql</h3>
-
-<pre>
-<code>
+# generated sql
 SELECT "people"."id" AS t0_r0, "people"."first_name" AS t0_r1, "people"."last_name" AS t0_r2,
 "people"."created_at" AS t0_r3, "people"."updated_at" AS t0_r4, "collaborations"."id" AS t1_r0,
 "collaborations"."movie_id" AS t1_r1, "collaborations"."person_id" AS t1_r2,
@@ -152,6 +152,9 @@ LEFT OUTER JOIN "production_houses" ON "production_houses"."id" = "productions".
 WHERE "movies"."genre" = 'superhero' AND
 "production_houses"."name" = 'DC Comics' AND
 "collaborations"."role" = 'actor'
+
+# result
+[Person id: 57213424, first_name: "Christopher", last_name: "Reeve"]
 </code>
 </pre>
 
@@ -171,29 +174,20 @@ WHERE "movies"."genre" = 'superhero' AND
 <pre>
 <code>
 class Movie < ActiveRecord::Base
-.......
-scope :dccomics, lambda { joins(:production_houses).merge(ProductionHouse.dccomics) }
-.......
+  scope :dccomics, lambda { joins(:production_houses).merge(ProductionHouse.dccomics) }
 end
 </code>
 </pre>
 
-    <h3>Query that fails</h3>
+    <h3>Query fails</h3>
 
 <pre>
 <code>
-Person.
-joins(movies: :production_houses).
-merge(Movie.dccomics)
-</code>
-</pre>
+Person.joins(movies: :production_houses).merge(Movie.dccomics)
 
-      <h3>Query fails with following error</h3>
-<pre>
-<code>
-Person.joins(movies: :production_houses).merge(Movie.dccomics).to_a
-ActiveRecord::ConfigurationError: Association named 'production_houses' was not found; perhaps you misspelled it?
-from /Users/subbarao/.rbenv/versions/1.9.3-p0/lib/ruby/gems/1.9.1/gems/activerecord-3.2.6/lib/active_record/associations/join_dependency.rb:112:in `build'
+# fails with following error
+ActiveRecord::ConfigurationError: Association named 'production_houses' was not found;
+perhaps you misspelled it?
 </code>
 </pre>
 
